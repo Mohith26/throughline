@@ -1,0 +1,69 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.9', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: build the sample design file
+        run: python fixtures/generate.py
+      - name: run the test suite
+        run: python tests/run.py
+
+  gate:
+    # The tool gating on itself. The fixture has deliberate blockers in it, so a
+    # zero exit code here would mean the analyser has stopped noticing them.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python fixtures/generate.py
+      - name: the fixture must fail the gate
+        run: |
+          if python core/report.py fixtures/design.json > /dev/null; then
+            echo "expected a non zero exit code from a file with planted blockers"
+            exit 1
+          fi
+      - name: a clean file must pass the gate
+        run: |
+          python - <<'PY'
+          import json
+          json.dump({
+            "needs": [{"id": "UN-001", "title": "a need"}],
+            "requirements": [{"id": "SRS-001", "title": "a requirement",
+                              "needs": ["UN-001"], "safety_related": True}],
+            "verifications": [{"id": "VER-001", "title": "a verification",
+                               "requirements": ["SRS-001"], "sample_size": 5}],
+            "runs": [{"id": "RUN-001", "verification": "VER-001", "result": "pass",
+                      "executed_on": "2026-05-01", "units": 5, "failures": 0}],
+          }, open("clean.json", "w"))
+          PY
+          python core/report.py clean.json > /dev/null
+
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python fixtures/generate.py
+      - name: benchmarks on a native interpreter
+        run: python bench/run.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks
+          path: results/benchmarks.json

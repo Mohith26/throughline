@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+clean.json
+.DS_Store
