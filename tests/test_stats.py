@@ -68,9 +68,23 @@ class ClopperPearsonTests(unittest.TestCase):
     def test_zero_failures_lower_bound_is_zero(self):
         low, high = stats.clopper_pearson(0, 29, 0.95)
         self.assertEqual(low, 0.0)
-        # Published value: with 0 failures in 29, the 95 percent upper bound on
-        # the failure rate is 0.0982, so reliability is 0.9018.
-        self.assertAlmostEqual(high, 0.09823, places=4)
+        # Two sided puts 2.5 percent in the upper tail, so the bound solves
+        # (1-p)^29 = 0.025, giving 0.11944.
+        self.assertAlmostEqual(high, 0.11944, places=5)
+
+    def test_one_and_two_sided_bounds_differ_as_the_definitions_require(self):
+        # One sided solves (1-p)^29 = 0.05 and two sided solves = 0.025. These
+        # are the two numbers that are constantly confused in reliability reports,
+        # so both are pinned here with their closed forms.
+        _, one = stats.clopper_pearson(0, 29, 0.95, sided=1)
+        _, two = stats.clopper_pearson(0, 29, 0.95, sided=2)
+        self.assertAlmostEqual(one, 1.0 - 0.05 ** (1.0 / 29), places=9)
+        self.assertAlmostEqual(two, 1.0 - 0.025 ** (1.0 / 29), places=9)
+        self.assertLess(one, two)
+
+    def test_sided_argument_is_validated(self):
+        with self.assertRaises(ValueError):
+            stats.clopper_pearson(0, 10, 0.95, sided=3)
 
     def test_all_failures_upper_bound_is_one(self):
         low, high = stats.clopper_pearson(5, 5, 0.95)
@@ -133,12 +147,23 @@ class SuccessRunTests(unittest.TestCase):
             self.assertLess(stats.demonstrated_reliability(n - 1, 0.95), reliability)
 
     def test_agrees_with_the_exact_binomial_bound(self):
-        # The success run formula should match the Clopper-Pearson reliability
-        # bound for a clean run. Two independent routes to the same number.
-        for n in [12, 29, 59]:
-            formula = stats.demonstrated_reliability(n, 0.95)
-            exact = stats.reliability_lower_bound(0, n, 0.95)
-            self.assertAlmostEqual(formula, exact, places=6)
+        # The success run formula and the exact one sided Clopper-Pearson bound
+        # are two independent routes to the same number, and they have to agree.
+        # They did not agree in the first version, which is how the one sided
+        # versus two sided mistake surfaced.
+        for n in [12, 29, 59, 100]:
+            for confidence in [0.90, 0.95, 0.99]:
+                formula = stats.demonstrated_reliability(n, confidence)
+                exact = stats.reliability_lower_bound(0, n, confidence)
+                self.assertAlmostEqual(formula, exact, places=9,
+                                       msg="n=%d c=%s" % (n, confidence))
+
+    def test_reliability_bound_falls_as_failures_appear(self):
+        clean = stats.reliability_lower_bound(0, 59, 0.95)
+        one_bad = stats.reliability_lower_bound(1, 59, 0.95)
+        two_bad = stats.reliability_lower_bound(2, 59, 0.95)
+        self.assertGreater(clean, one_bad)
+        self.assertGreater(one_bad, two_bad)
 
     def test_invalid_input(self):
         with self.assertRaises(ValueError):
