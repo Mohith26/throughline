@@ -154,8 +154,19 @@ def bench_numerics():
 
 
 def bench_recovery():
-    """How well the Weibull fit recovers parameters it was built from, across a
-    range of shapes and sample sizes."""
+    """How well the Weibull fit recovers parameters it was built from.
+
+    Two modes, and the difference between them is the point.
+
+    The noiseless mode feeds the exact median rank quantiles back in. It returns
+    zero error to fifteen decimal places, which proves the algebra is right and
+    proves nothing whatsoever about behaviour on data. A benchmark that scores
+    perfectly is telling you the benchmark is too easy.
+
+    The sampled mode draws actual random failures from the same distribution,
+    which is what a real reliability study has, and reports the spread across
+    repeated studies. Those are the numbers worth quoting.
+    """
     rows = []
     for shape, scale in [(0.8, 500.0), (1.0, 1000.0), (2.2, 1450.0), (4.0, 800.0)]:
         for n in [10, 25, 50]:
@@ -164,13 +175,40 @@ def bench_recovery():
             got_shape, got_scale, r2 = stats.weibull_fit(times)
             rows.append({
                 "true_shape": shape, "true_scale": scale, "n": n,
-                "shape_error_pct": round(abs(got_shape - shape) / shape * 100.0, 6),
-                "scale_error_pct": round(abs(got_scale - scale) / scale * 100.0, 6),
-                "r_squared": round(r2, 6),
+                "shape_error_pct": round(abs(got_shape - shape) / shape * 100.0, 9),
+                "scale_error_pct": round(abs(got_scale - scale) / scale * 100.0, 9),
+                "r_squared": round(r2, 9),
             })
-    return {"cases": rows,
-            "worst_shape_error_pct": max(r["shape_error_pct"] for r in rows),
-            "worst_scale_error_pct": max(r["scale_error_pct"] for r in rows)}
+
+    sampled = []
+    rng = random.Random(4242)
+    for shape, scale in [(1.0, 1000.0), (2.2, 1450.0), (4.0, 800.0)]:
+        for n in [10, 25, 50, 100]:
+            shape_errors = []
+            scale_errors = []
+            r2s = []
+            for _ in range(200):
+                times = sorted(scale * (-math.log(1.0 - rng.random())) ** (1.0 / shape)
+                               for _ in range(n))
+                got_shape, got_scale, r2 = stats.weibull_fit(times)
+                shape_errors.append(abs(got_shape - shape) / shape * 100.0)
+                scale_errors.append(abs(got_scale - scale) / scale * 100.0)
+                r2s.append(r2)
+            sampled.append({
+                "true_shape": shape, "true_scale": scale, "n": n, "studies": 200,
+                "median_shape_error_pct": round(statistics.median(shape_errors), 3),
+                "p90_shape_error_pct": round(sorted(shape_errors)[179], 3),
+                "median_scale_error_pct": round(statistics.median(scale_errors), 3),
+                "median_r_squared": round(statistics.median(r2s), 4),
+            })
+
+    return {
+        "noiseless": rows,
+        "noiseless_worst_shape_error_pct": max(r["shape_error_pct"] for r in rows),
+        "noiseless_note": "exact quantiles in, so zero error here only checks the algebra",
+        "sampled": sampled,
+        "sampled_worst_median_shape_error_pct": max(s["median_shape_error_pct"] for s in sampled),
+    }
 
 
 def main():
@@ -204,9 +242,14 @@ def main():
         print("  %-22s p50 %8.4f ms" % (name, ops[name]["p50_ms"]))
     print("binomial cdf worst absolute error vs direct summation: %.3e"
           % payload["numerics"]["worst_absolute_error"])
-    print("weibull recovery worst shape error %.6f%%, worst scale error %.6f%%"
-          % (payload["weibull_recovery"]["worst_shape_error_pct"],
-             payload["weibull_recovery"]["worst_scale_error_pct"]))
+    rec = payload["weibull_recovery"]
+    print("weibull noiseless worst shape error %.2e%% (algebra check only)"
+          % rec["noiseless_worst_shape_error_pct"])
+    print("weibull sampled median shape error by study size:")
+    for s in rec["sampled"]:
+        print("  shape %.1f n=%3d -> median %5.2f%%  p90 %5.2f%%  r2 %.4f"
+              % (s["true_shape"], s["n"], s["median_shape_error_pct"],
+                 s["p90_shape_error_pct"], s["median_r_squared"]))
     print("clock floor %.4f ms" % payload["environment"]["clock"]["median_gap_ms"])
     print("wrote %s in %.1fs" % (path, payload["wall_seconds"]))
     return 0
