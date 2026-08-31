@@ -80,7 +80,7 @@ VERIFICATIONS = [
 # HAZ-003  is controlled, but by RC-004 -> SRS-007 which is fine, so no finding
 # VER-004  latest run fails                                   -> blocker
 # VER-008  run used 8 units against a protocol calling for 10  -> major
-# VER-009  recorded as a pass while reporting 2 failing units  -> blocker
+# RUN-011  on VER-009 is recorded as a pass while reporting 2 failing units -> blocker
 # UN-006   is covered, so clean; UN-003 covered twice, clean
 # SRS-012  has no user need                                    -> minor orphan
 # VER-011  points at SRS-011 and also at a requirement that does not exist -> major
@@ -90,7 +90,7 @@ VERIFICATIONS = [
 EXPECTED_FINDINGS = [
     ("requirement-unverified", "SRS-014", "blocker"),
     ("verification-failed", "VER-004", "blocker"),
-    ("contradictory-run", "RUN-021", "blocker"),
+    ("contradictory-run", "RUN-011", "blocker"),
     ("sample-size-short", "VER-008", "major"),
     ("dangling-requirement-link", "VER-011", "major"),
     ("verification-not-run", "VER-013", "major"),
