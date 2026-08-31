@@ -11,7 +11,7 @@
   },
   {
     "rule": "contradictory-run",
-    "subject": "RUN-021",
+    "subject": "RUN-011",
     "severity": "blocker"
   },
   {
