@@ -87,20 +87,30 @@ def binomial_cdf(k, n, p):
     return betainc(n - k, k + 1, 1.0 - p)
 
 
-def clopper_pearson(failures, n, confidence=0.95):
-    """Exact two sided interval for a proportion.
+def clopper_pearson(failures, n, confidence=0.95, sided=2):
+    """Exact interval for a proportion.
 
     Returns (low, high) for the failure proportion. Exact means it is built from
     the binomial distribution directly rather than a normal approximation, so it
     never produces a bound outside [0, 1] and it stays honest at the small sample
     sizes design verification actually uses.
+
+    `sided` matters more than it looks. A two sided 95 percent interval puts 2.5
+    percent in each tail; a one sided 95 percent bound puts the whole 5 percent in
+    one tail. Reliability demonstrations quote the one sided bound, and confusing
+    the two is not a rounding difference: for a clean run of 29 units the upper
+    bound on the failure rate is 0.0981 one sided against 0.1194 two sided. I got
+    this wrong first time by writing alpha/2 everywhere, and the tests caught it
+    because the success run formula and the exact bound stopped agreeing.
     """
     if not 0 <= failures <= n:
         raise ValueError("failures must lie in [0, n]")
+    if sided not in (1, 2):
+        raise ValueError("sided must be 1 or 2")
     if n == 0:
         return 0.0, 1.0
     alpha = 1.0 - confidence
-    tail = alpha / 2.0
+    tail = alpha / 2.0 if sided == 2 else alpha
     low = 0.0 if failures == 0 else _solve_low(failures, n, tail)
     high = 1.0 if failures == n else _solve_high(failures, n, tail)
     return low, high
@@ -135,10 +145,15 @@ def _solve_high(failures, n, tail):
 
 
 def reliability_lower_bound(failures, n, confidence=0.95):
-    """Lower confidence bound on reliability, which is 1 minus the upper bound on
-    the failure proportion. This is the number a verification report should quote:
-    "at least R reliability with C confidence"."""
-    _, high = clopper_pearson(failures, n, confidence)
+    """Lower confidence bound on reliability: one minus the one sided upper bound
+    on the failure proportion.
+
+    One sided on purpose. This is the number a verification report quotes as "at
+    least R reliability with C confidence", and that statement only constrains one
+    tail. Using the two sided bound here would understate the demonstrated
+    reliability and disagree with the success run formula.
+    """
+    _, high = clopper_pearson(failures, n, confidence, sided=1)
     return 1.0 - high
 
 
