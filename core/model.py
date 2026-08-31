@@ -150,6 +150,7 @@ class DesignFile(object):
         self.controls = {}
         self.verifications = {}
         self.runs = {}
+        self._index = None
 
     # ---- construction ----------------------------------------------------
 
@@ -161,26 +162,79 @@ class DesignFile(object):
         if item.id in table:
             raise ModelError("duplicate %s id %s" % (item.kind, item.id))
         table[item.id] = item
+        self._index = None
         return item
+
+    # ---- reverse index ---------------------------------------------------
+
+    def _build_index(self):
+        """Bucket every link once instead of scanning for it every time.
+
+        The first version answered each lookup with a list comprehension over the
+        whole table, so an analysis that asks "which verifications cover this
+        requirement" once per requirement was quadratic. It did not show at
+        fourteen requirements and it very much showed at eight hundred: doubling
+        the file size quadrupled the analysis time.
+
+        The index is built lazily and thrown away on any add, so it can never
+        drift from the tables it summarises.
+        """
+        reqs_by_need = {}
+        for req in self.requirements.values():
+            for need_id in req.needs:
+                reqs_by_need.setdefault(need_id, []).append(req)
+        vers_by_req = {}
+        for ver in self.verifications.values():
+            for req_id in ver.requirements:
+                vers_by_req.setdefault(req_id, []).append(ver)
+        runs_by_ver = {}
+        for run in self.runs.values():
+            runs_by_ver.setdefault(run.verification, []).append(run)
+        controls_by_hazard = {}
+        for control in self.controls.values():
+            controls_by_hazard.setdefault(control.hazard, []).append(control)
+        latest = {}
+        for ver_id, runs in runs_by_ver.items():
+            latest[ver_id] = sorted(runs, key=lambda r: (r.executed_on, r.id))[-1]
+        self._index = {
+            "reqs_by_need": reqs_by_need,
+            "vers_by_req": vers_by_req,
+            "runs_by_ver": runs_by_ver,
+            "controls_by_hazard": controls_by_hazard,
+            "latest_run": latest,
+        }
+        return self._index
+
+    def index(self):
+        return self._index if self._index is not None else self._build_index()
+
+    def __len__(self):
+        return sum(len(t) for t in
+                   (self.needs, self.requirements, self.hazards,
+                    self.controls, self.verifications, self.runs))
+
+    def counts(self):
+        return {
+            "needs": len(self.needs), "requirements": len(self.requirements),
+            "hazards": len(self.hazards), "controls": len(self.controls),
+            "verifications": len(self.verifications), "runs": len(self.runs),
+        }
 
     # ---- reverse indexes -------------------------------------------------
 
     def requirements_for_need(self, need_id):
-        return [r for r in self.requirements.values() if need_id in r.needs]
+        return list(self.index()["reqs_by_need"].get(need_id, ()))
 
     def verifications_for_requirement(self, req_id):
-        return [v for v in self.verifications.values() if req_id in v.requirements]
+        return list(self.index()["vers_by_req"].get(req_id, ()))
 
     def runs_for_verification(self, ver_id):
-        return [r for r in self.runs.values() if r.verification == ver_id]
+        return list(self.index()["runs_by_ver"].get(ver_id, ()))
 
     def controls_for_hazard(self, hazard_id):
-        return [c for c in self.controls.values() if c.hazard == hazard_id]
+        return list(self.index()["controls_by_hazard"].get(hazard_id, ()))
 
     def latest_run(self, ver_id):
         """Most recent run by execution date, ties broken by identifier so the
         answer is deterministic when two runs share a date."""
-        runs = self.runs_for_verification(ver_id)
-        if not runs:
-            return None
-        return sorted(runs, key=lambda r: (r.executed_on, r.id))[-1]
+        return self.index()["latest_run"].get(ver_id)
