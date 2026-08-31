@@ -1,0 +1,492 @@
+{
+  "controls": [
+    {
+      "hazard": "HAZ-001",
+      "id": "RC-001",
+      "requirement": "SRS-003",
+      "residual_probability": "remote",
+      "residual_severity": "minor",
+      "title": "Tip temperature limit enforced in firmware"
+    },
+    {
+      "hazard": "HAZ-001",
+      "id": "RC-002",
+      "requirement": "SRS-004",
+      "residual_probability": "improbable",
+      "residual_severity": "minor",
+      "title": "Independent thermal cutout"
+    },
+    {
+      "hazard": "HAZ-002",
+      "id": "RC-003",
+      "requirement": "SRS-002",
+      "residual_probability": "improbable",
+      "residual_severity": "serious",
+      "title": "Closed loop depth control with tolerance limit"
+    },
+    {
+      "hazard": "HAZ-003",
+      "id": "RC-004",
+      "requirement": "SRS-007",
+      "residual_probability": "remote",
+      "residual_severity": "minor",
+      "title": "Battery warning ahead of exhaustion"
+    },
+    {
+      "hazard": "HAZ-004",
+      "id": "RC-005",
+      "requirement": "SRS-005",
+      "residual_probability": "improbable",
+      "residual_severity": "minor",
+      "title": "Validated reprocessing instructions"
+    },
+    {
+      "hazard": "HAZ-005",
+      "id": "RC-006",
+      "requirement": "SRS-012",
+      "residual_probability": "improbable",
+      "residual_severity": "serious",
+      "title": "Single fault current limit"
+    }
+  ],
+  "hazards": [
+    {
+      "id": "HAZ-001",
+      "probability": "occasional",
+      "severity": "serious",
+      "title": "Thermal injury to tissue adjacent to the cutting site"
+    },
+    {
+      "id": "HAZ-002",
+      "probability": "remote",
+      "severity": "critical",
+      "title": "Cut deeper than intended"
+    },
+    {
+      "id": "HAZ-003",
+      "probability": "remote",
+      "severity": "serious",
+      "title": "Loss of function part way through a procedure"
+    },
+    {
+      "id": "HAZ-004",
+      "probability": "improbable",
+      "severity": "critical",
+      "title": "Cross contamination between patients"
+    },
+    {
+      "id": "HAZ-005",
+      "probability": "improbable",
+      "severity": "catastrophic",
+      "title": "Electrical shock from a single fault condition"
+    }
+  ],
+  "needs": [
+    {
+      "id": "UN-001",
+      "title": "The surgeon can control cutting depth precisely during a procedure"
+    },
+    {
+      "id": "UN-002",
+      "title": "The instrument does not overheat tissue outside the cutting site"
+    },
+    {
+      "id": "UN-003",
+      "title": "The instrument can be reprocessed between patients"
+    },
+    {
+      "id": "UN-004",
+      "title": "The instrument warns the user before the battery is exhausted"
+    },
+    {
+      "id": "UN-005",
+      "title": "The console records each procedure for later review"
+    },
+    {
+      "id": "UN-006",
+      "title": "The instrument is comfortable to hold for a long procedure"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "SRS-001",
+      "needs": [
+        "UN-001"
+      ],
+      "safety_related": false,
+      "title": "Cutting depth is settable from 0.5 mm to 4.0 mm in 0.1 mm steps"
+    },
+    {
+      "id": "SRS-002",
+      "needs": [
+        "UN-001"
+      ],
+      "safety_related": true,
+      "title": "Depth setting is held to within 0.05 mm of the commanded value"
+    },
+    {
+      "id": "SRS-003",
+      "needs": [
+        "UN-002"
+      ],
+      "safety_related": true,
+      "title": "Tip temperature does not exceed 42 C at the tissue interface"
+    },
+    {
+      "id": "SRS-004",
+      "needs": [
+        "UN-002"
+      ],
+      "safety_related": true,
+      "title": "Thermal cutout disables drive within 200 ms of exceeding 45 C"
+    },
+    {
+      "id": "SRS-005",
+      "needs": [
+        "UN-003"
+      ],
+      "safety_related": false,
+      "title": "Housing withstands 200 autoclave cycles without loss of seal"
+    },
+    {
+      "id": "SRS-006",
+      "needs": [
+        "UN-003"
+      ],
+      "safety_related": false,
+      "title": "All external surfaces are cleanable with the listed agents"
+    },
+    {
+      "id": "SRS-007",
+      "needs": [
+        "UN-004"
+      ],
+      "safety_related": true,
+      "title": "A low battery warning is issued with at least 10 minutes remaining"
+    },
+    {
+      "id": "SRS-008",
+      "needs": [
+        "UN-004"
+      ],
+      "safety_related": false,
+      "title": "Battery state of charge is estimated to within 5 percent"
+    },
+    {
+      "id": "SRS-009",
+      "needs": [
+        "UN-005"
+      ],
+      "safety_related": false,
+      "title": "Each procedure is written to the console log within 2 s of completion"
+    },
+    {
+      "id": "SRS-010",
+      "needs": [
+        "UN-005"
+      ],
+      "safety_related": false,
+      "title": "Procedure logs are retained for 90 days"
+    },
+    {
+      "id": "SRS-011",
+      "needs": [
+        "UN-006"
+      ],
+      "safety_related": false,
+      "title": "Grip force required for actuation does not exceed 12 N"
+    },
+    {
+      "id": "SRS-012",
+      "needs": [],
+      "safety_related": true,
+      "title": "Drive current is limited to 2.0 A under any single fault"
+    },
+    {
+      "id": "SRS-013",
+      "needs": [
+        "UN-002"
+      ],
+      "safety_related": true,
+      "title": "Firmware verifies its own image before enabling the drive"
+    },
+    {
+      "id": "SRS-014",
+      "needs": [
+        "UN-001"
+      ],
+      "safety_related": true,
+      "title": "Console rejects a handpiece whose calibration has expired"
+    }
+  ],
+  "runs": [
+    {
+      "executed_on": "2026-03-02",
+      "failures": 0,
+      "id": "RUN-001",
+      "notes": null,
+      "result": "pass",
+      "units": 10,
+      "verification": "VER-001"
+    },
+    {
+      "executed_on": "2026-03-04",
+      "failures": 0,
+      "id": "RUN-002",
+      "notes": null,
+      "result": "pass",
+      "units": 30,
+      "verification": "VER-002"
+    },
+    {
+      "executed_on": "2026-03-06",
+      "failures": 0,
+      "id": "RUN-003",
+      "notes": null,
+      "result": "pass",
+      "units": 12,
+      "verification": "VER-003"
+    },
+    {
+      "executed_on": "2026-03-08",
+      "failures": 3,
+      "id": "RUN-004",
+      "notes": "cutout measured at 240 ms on three units",
+      "result": "fail",
+      "units": 29,
+      "verification": "VER-004"
+    },
+    {
+      "executed_on": "2026-03-21",
+      "failures": 0,
+      "id": "RUN-005",
+      "notes": "after firmware change 1.4.2",
+      "result": "pass",
+      "units": 29,
+      "verification": "VER-004"
+    },
+    {
+      "executed_on": "2026-04-14",
+      "failures": 1,
+      "id": "RUN-006",
+      "notes": "regression after thermal model rework",
+      "result": "fail",
+      "units": 29,
+      "verification": "VER-004"
+    },
+    {
+      "executed_on": "2026-03-10",
+      "failures": 0,
+      "id": "RUN-007",
+      "notes": null,
+      "result": "pass",
+      "units": 6,
+      "verification": "VER-005"
+    },
+    {
+      "executed_on": "2026-03-12",
+      "failures": 0,
+      "id": "RUN-008",
+      "notes": null,
+      "result": "pass",
+      "units": 3,
+      "verification": "VER-006"
+    },
+    {
+      "executed_on": "2026-03-14",
+      "failures": 0,
+      "id": "RUN-009",
+      "notes": null,
+      "result": "pass",
+      "units": 29,
+      "verification": "VER-007"
+    },
+    {
+      "executed_on": "2026-03-16",
+      "failures": 0,
+      "id": "RUN-010",
+      "notes": "two units unavailable at time of test",
+      "result": "pass",
+      "units": 8,
+      "verification": "VER-008"
+    },
+    {
+      "executed_on": "2026-03-18",
+      "failures": 2,
+      "id": "RUN-011",
+      "notes": "two units logged late but within margin",
+      "result": "pass",
+      "units": 20,
+      "verification": "VER-009"
+    },
+    {
+      "executed_on": "2026-03-20",
+      "failures": null,
+      "id": "RUN-012",
+      "notes": null,
+      "result": "pass",
+      "units": null,
+      "verification": "VER-010"
+    },
+    {
+      "executed_on": "2026-03-22",
+      "failures": 0,
+      "id": "RUN-013",
+      "notes": null,
+      "result": "pass",
+      "units": 15,
+      "verification": "VER-011"
+    },
+    {
+      "executed_on": "2026-03-24",
+      "failures": 0,
+      "id": "RUN-014",
+      "notes": null,
+      "result": "pass",
+      "units": 8,
+      "verification": "VER-012"
+    },
+    {
+      "executed_on": "2026-04-03",
+      "failures": 0,
+      "id": "RUN-015",
+      "notes": "repeat after tooling change",
+      "result": "pass",
+      "units": 30,
+      "verification": "VER-002"
+    }
+  ],
+  "verifications": [
+    {
+      "acceptance": "all steps within tolerance",
+      "id": "VER-001",
+      "method": "test",
+      "requirements": [
+        "SRS-001"
+      ],
+      "sample_size": 10,
+      "title": "Depth range and step verification"
+    },
+    {
+      "acceptance": "max error <= 0.05 mm",
+      "id": "VER-002",
+      "method": "test",
+      "requirements": [
+        "SRS-002"
+      ],
+      "sample_size": 30,
+      "title": "Depth accuracy over temperature"
+    },
+    {
+      "acceptance": "peak <= 42 C",
+      "id": "VER-003",
+      "method": "test",
+      "requirements": [
+        "SRS-003"
+      ],
+      "sample_size": 12,
+      "title": "Tip temperature mapping"
+    },
+    {
+      "acceptance": "cutout <= 200 ms",
+      "id": "VER-004",
+      "method": "test",
+      "requirements": [
+        "SRS-004"
+      ],
+      "sample_size": 29,
+      "title": "Thermal cutout response time"
+    },
+    {
+      "acceptance": "seal intact after 200 cycles",
+      "id": "VER-005",
+      "method": "test",
+      "requirements": [
+        "SRS-005"
+      ],
+      "sample_size": 6,
+      "title": "Autoclave endurance"
+    },
+    {
+      "acceptance": "no surface degradation",
+      "id": "VER-006",
+      "method": "inspection",
+      "requirements": [
+        "SRS-006"
+      ],
+      "sample_size": 3,
+      "title": "Cleaning agent compatibility"
+    },
+    {
+      "acceptance": "warning >= 10 min before cutoff",
+      "id": "VER-007",
+      "method": "test",
+      "requirements": [
+        "SRS-007"
+      ],
+      "sample_size": 29,
+      "title": "Low battery warning timing"
+    },
+    {
+      "acceptance": "error <= 5 percent",
+      "id": "VER-008",
+      "method": "test",
+      "requirements": [
+        "SRS-008"
+      ],
+      "sample_size": 10,
+      "title": "State of charge accuracy"
+    },
+    {
+      "acceptance": "latency <= 2 s",
+      "id": "VER-009",
+      "method": "test",
+      "requirements": [
+        "SRS-009"
+      ],
+      "sample_size": 20,
+      "title": "Procedure log latency"
+    },
+    {
+      "acceptance": "retention policy documented",
+      "id": "VER-010",
+      "method": "analysis",
+      "requirements": [
+        "SRS-010"
+      ],
+      "sample_size": null,
+      "title": "Log retention"
+    },
+    {
+      "acceptance": "force <= 12 N",
+      "id": "VER-011",
+      "method": "test",
+      "requirements": [
+        "SRS-011",
+        "SRS-099"
+      ],
+      "sample_size": 15,
+      "title": "Grip force measurement"
+    },
+    {
+      "acceptance": "current <= 2.0 A",
+      "id": "VER-012",
+      "method": "test",
+      "requirements": [
+        "SRS-012"
+      ],
+      "sample_size": 8,
+      "title": "Single fault current limit"
+    },
+    {
+      "acceptance": "corrupt image refused",
+      "id": "VER-013",
+      "method": "test",
+      "requirements": [
+        "SRS-013"
+      ],
+      "sample_size": 5,
+      "title": "Firmware image verification"
+    }
+  ]
+}

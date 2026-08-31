@@ -1,0 +1,42 @@
+[
+  {
+    "rule": "requirement-unverified",
+    "subject": "SRS-014",
+    "severity": "blocker"
+  },
+  {
+    "rule": "verification-failed",
+    "subject": "VER-004",
+    "severity": "blocker"
+  },
+  {
+    "rule": "contradictory-run",
+    "subject": "RUN-021",
+    "severity": "blocker"
+  },
+  {
+    "rule": "sample-size-short",
+    "subject": "VER-008",
+    "severity": "major"
+  },
+  {
+    "rule": "dangling-requirement-link",
+    "subject": "VER-011",
+    "severity": "major"
+  },
+  {
+    "rule": "verification-not-run",
+    "subject": "VER-013",
+    "severity": "major"
+  },
+  {
+    "rule": "orphan-requirement",
+    "subject": "SRS-012",
+    "severity": "minor"
+  },
+  {
+    "rule": "control-requirement-not-flagged",
+    "subject": "RC-005",
+    "severity": "minor"
+  }
+]
