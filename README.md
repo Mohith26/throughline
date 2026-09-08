@@ -39,13 +39,13 @@ UserNeed  ->  Requirement  ->  Verification  ->  TestRun
 
 ## Two design decisions
 
-**Nothing raises during analysis.** A design file is incomplete for most of its
+Nothing raises during analysis. A design file is incomplete for most of its
 life, and a tool that refuses to load an incomplete file is useless exactly when
 you want it most. Loading rejects only what makes an object impossible to build,
 such as an unknown severity word. Everything else, including links that point at
 nothing, comes back as a finding with a severity attached.
 
-**Severity is graded, not flat.** An unverified safety related requirement is a
+Severity is graded, not flat. An unverified safety related requirement is a
 blocker; an unverified ordinary one is a major. A hazard with no control at all
 is a blocker; a control that exists but whose requirement was not flagged safety
 related is a minor. Sorting an undifferentiated findings list is how the
@@ -102,14 +102,14 @@ dependency minimalism: a reliability claim in a design history file has to be
 defensible line by line, and "the library said so" is not a defence. The tests
 check against published values and closed forms, not against a previous run.
 
-- **Regularised incomplete beta**, by the modified Lentz continued fraction. The
+- Regularised incomplete beta, by the modified Lentz continued fraction. The
   binomial CDF and the Clopper-Pearson interval both go through it. Checked
   against direct binomial summation across 1,266 combinations: worst absolute
   error 2.6e-14.
-- **Clopper-Pearson exact interval**, one or two sided.
-- **Success run sizing**, which reproduces the two numbers every reliability plan
+- Clopper-Pearson exact interval, one or two sided.
+- Success run sizing, which reproduces the two numbers every reliability plan
   quotes: 29 units for 90/95 and 59 for 95/95.
-- **Weibull by median rank regression**, with the r squared reported next to the
+- Weibull by median rank regression, with the r squared reported next to the
   parameters rather than buried, because a Weibull fitted to data that is not
   Weibull still returns two confident looking numbers.
 
@@ -129,11 +129,11 @@ demonstrating 90 percent reliability and demonstrating 88 percent.
 `clopper_pearson` now takes a `sided` argument and `reliability_lower_bound` is
 explicitly one sided, with both closed forms pinned in the tests.
 
-## Numbers
+## Scaling and accuracy
 
 From `results/benchmarks.json`.
 
-**Analysis was quadratic and is now linear.** Every reverse lookup was a list
+Analysis was quadratic and is now linear. Every reverse lookup was a list
 comprehension over the whole table, so asking "which verifications cover this
 requirement" once per requirement scanned everything twice over. It is invisible
 at fourteen requirements and very visible at eight hundred:
@@ -150,7 +150,7 @@ Fitted scaling exponent went from **1.22 to 0.91**, and the largest case got 11.
 faster. The fix is a lazily built reverse index that is discarded on any write, so
 it cannot drift from the tables it summarises.
 
-**How much data a reliability study actually needs.** The Weibull recovery
+How much data a reliability study actually needs. The Weibull recovery
 benchmark runs two ways on purpose. Fed the exact median rank quantiles it
 returns zero error to fifteen decimal places, which checks the algebra and proves
 nothing about behaviour on data. Fed genuinely random samples, 200 studies per
@@ -168,15 +168,15 @@ two decimal places off ten units is false precision, and the interpretation that
 hangs off it, infant mortality against wear out, is not reliable at that sample
 size either.
 
-**Environment.** Measured under CPython 3.12 compiled to WebAssembly, because no
+Environment. Measured under CPython 3.12 compiled to WebAssembly, because no
 native interpreter was available on the machine I built this on. It is slower than
-native, and the runtime clamps `perf_counter` to a **0.1 ms** floor, measured in
+native, and the runtime clamps `perf_counter` to a 0.1 ms floor, measured in
 the benchmark rather than assumed. Several per operation timings sit at that floor
 and are the clock rather than the code; they are left in the JSON and not quoted
 here. The scaling table and the accuracy figures are unaffected, because both are
 comparisons rather than absolute times.
 
-## Tests
+## How it is tested
 
 90 tests, about 0.15 seconds.
 
@@ -186,7 +186,7 @@ tests/test_stats.py   33   incomplete beta, exact intervals, success runs, Weibu
 tests/test_load.py    21   model validation, loader errors, multi file merge
 ```
 
-## Limitations
+## Known gaps
 
 - Synthetic data throughout. The device, the requirements and the failure times
   are invented, chosen so the tests can assert against known answers.

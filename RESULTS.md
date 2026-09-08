@@ -26,7 +26,7 @@ timer as a side channel defence. The benchmark measures that floor by spinning o
 `perf_counter` until the value changes, and reports it alongside everything else.
 
 Consequence: several per operation timings sit at 0.1 ms and are the clock, not
-the code. I have left them in the JSON and I do not quote them. The two headline
+the code. I have left them in the JSON and I do not quote them. The two main
 results are unaffected, because both are comparisons rather than absolute times:
 the scaling exponent is a ratio, and the accuracy figures have no clock in them.
 
@@ -103,7 +103,7 @@ scanned all verifications for each one. At fourteen requirements that is free. T
 
 The fix is a reverse index built lazily and discarded on any write, so it cannot
 drift from the tables it summarises. The exponent below 1.0 is measurement noise
-at these sizes, not a sublinear algorithm; the honest reading is "linear".
+at these sizes, not a sublinear algorithm; the fair reading is "linear".
 
 ## Numerical accuracy
 
